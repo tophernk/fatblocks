@@ -1,5 +1,8 @@
 package cj.blocks;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 public class BlockGame {
 
     public static final int STARTING_X = 6;
@@ -12,9 +15,14 @@ public class BlockGame {
     private int currentPiece_y;
     private boolean toggle;
 
-    public BlockGame() {
+    public void run() {
         while (noPieceAtTop()) {
-            turn();
+            try {
+                turn();
+            } catch (InterruptedException e) {
+                Logger.getAnonymousLogger().log(Level.WARNING, "Thread has been interrupted");
+                Thread.currentThread().interrupt();
+            }
         }
         System.out.println("= GAME OVER =");
     }
@@ -28,23 +36,23 @@ public class BlockGame {
         return true;
     }
 
-    private void turn() {
+    private void turn() throws InterruptedException {
         generateNewPiece();
         print();
         boolean dropped = true;
         while (dropped) {
-            try {
-                dropped = tick();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            if (toggle) {
-                moveRight();
-            } else {
-                moveLeft();
-            }
+            dropped = tick();
+            movePieceLaterally();
         }
         addPieceToPlayingField(playingField.getGameArea());
+    }
+
+    private void movePieceLaterally() {
+        if (toggle) {
+            moveRight();
+        } else {
+            moveLeft();
+        }
     }
 
     public boolean tick() throws InterruptedException {
