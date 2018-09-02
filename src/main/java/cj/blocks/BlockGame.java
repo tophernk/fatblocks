@@ -1,5 +1,10 @@
 package cj.blocks;
 
+import cj.blocks.Block;
+import cj.blocks.Piece;
+import cj.blocks.PieceFactory;
+import cj.blocks.PlayingField;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -94,22 +99,9 @@ public class BlockGame {
         currentField[y][x] = true;
         while (block.hasNext()) {
             block = block.getNext();
-            if (block.direction != null) {
-                switch (block.direction) {
-                    case UP:
-                        y--;
-                        break;
-                    case DOWN:
-                        y++;
-                        break;
-                    case LEFT:
-                        x--;
-                        break;
-                    case RIGHT:
-                        x++;
-                        break;
-                }
-            }
+            Coordinates coordinates = Coordinates.determineNextBlockCoordinates(block, y, x);
+            x = coordinates.getX();
+            y = coordinates.getY();
             currentField[y][x] = true;
         }
     }
@@ -123,22 +115,9 @@ public class BlockGame {
         }
         while (block.hasNext()) {
             block = block.getNext();
-            if (block.direction != null) {
-                switch (block.direction) {
-                    case UP:
-                        y--;
-                        break;
-                    case DOWN:
-                        y++;
-                        break;
-                    case LEFT:
-                        x--;
-                        break;
-                    case RIGHT:
-                        x++;
-                        break;
-                }
-            }
+            Coordinates coordinates = Coordinates.determineNextBlockCoordinates(block, y, x);
+            x = coordinates.getX();
+            y = coordinates.getY();
             if (!canBlockMoveTo(y + relativeY, x + relativeX)) {
                 return false;
             }
@@ -184,6 +163,46 @@ public class BlockGame {
     private void moveLeft() {
         if (canPieceMoveTo(0, -1)) {
             currentPiece_x--;
+        }
+    }
+
+    private static class Coordinates {
+        private int x;
+        private int y;
+
+        public Coordinates(int x, int y) {
+            this.x = x;
+            this.y = y;
+        }
+
+        public int getX() {
+            return x;
+        }
+
+        public int getY() {
+            return y;
+        }
+
+        public static Coordinates determineNextBlockCoordinates(Block block, int previousBlockY, int previousBlockX) {
+            int y = previousBlockY;
+            int x = previousBlockX;
+            if (block.direction != null) {
+                switch (block.direction) {
+                    case UP:
+                        y--;
+                        break;
+                    case DOWN:
+                        y++;
+                        break;
+                    case LEFT:
+                        x--;
+                        break;
+                    case RIGHT:
+                        x++;
+                        break;
+                }
+            }
+            return new Coordinates(x, y);
         }
     }
 }

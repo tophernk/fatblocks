@@ -1,8 +1,5 @@
 package cj.blocks;
 
-import sun.misc.Signal;
-import sun.misc.SignalHandler;
-
 /**
  * Hello world!
  *
