@@ -17,11 +17,12 @@ public class Coordinates {
         return y;
     }
 
-    public static Coordinates determineNextBlockCoordinates(Block block, int previousBlockY, int previousBlockX) {
+    public static Coordinates determineNextBlockCoordinates(Block block, BlockDirection[] currentOrientation, int previousBlockY, int previousBlockX) {
         int y = previousBlockY;
         int x = previousBlockX;
         if (block.direction != null) {
-            switch (block.direction) {
+            BlockDirection direction = currentOrientation[block.direction.getIndex()];
+            switch (direction) {
                 case UP:
                     y--;
                     break;
