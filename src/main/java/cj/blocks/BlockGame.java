@@ -5,7 +5,7 @@ import java.util.logging.Logger;
 
 public class BlockGame {
 
-    public static final int STARTING_X = 6;
+    private int startingX = -2;
     public static final int STARTING_Y = 0;
     public static final int PLAYING_FIELD_WIDTH = 14;
     public static final int PLAYING_FIELD_HEIGHT = 18;
@@ -67,8 +67,8 @@ public class BlockGame {
         while (dropped) {
             dropped = tick();
             if (dropped) {
-                movePieceLaterally();
-                rotateClockwise();
+//                movePieceLaterally();
+//                rotateClockwise();
             }
         }
         addPieceToPlayingField(playingField.getGameArea());
@@ -85,8 +85,26 @@ public class BlockGame {
     public boolean tick() throws InterruptedException {
         Thread.sleep(tickTime);
         boolean dropped = dropPiece();
+        boolean linesRemoved = removeFullLines();
         print();
         return dropped;
+    }
+
+    private boolean removeFullLines() {
+        boolean linesRemoved = false;
+        for (int y = 0; y < PLAYING_FIELD_HEIGHT; y++) {
+            boolean removeLine = true;
+            for (int x = 0; x < PLAYING_FIELD_WIDTH; x++) {
+                removeLine = playingField.getGameArea()[y][x];
+            }
+            if (removeLine) {
+                for (int x = 0; x < PLAYING_FIELD_WIDTH; x++) {
+                    playingField.getGameArea()[y][x] = false;
+                }
+                linesRemoved = true;
+            }
+        }
+        return linesRemoved;
     }
 
     public static void clearScreen() {
@@ -176,8 +194,14 @@ public class BlockGame {
         toggle = !toggle;
 //        currentPiece = PieceFactory.createBrokenBlockPiece();
 //        currentPiece = PieceFactory.createLinePiece();
-//        currentPiece = PieceFactory.createBlockPiece();
-        currentPiece_x = STARTING_X;
+        currentPiece = PieceFactory.createBlockPiece();
+        if (startingX + 2 < PLAYING_FIELD_WIDTH) {
+            startingX += 2;
+        }
+        else {
+            startingX = 0;
+        }
+        currentPiece_x = startingX;
         currentPiece_y = STARTING_Y;
         resetOrientation();
     }
