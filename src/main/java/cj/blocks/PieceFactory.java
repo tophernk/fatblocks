@@ -37,4 +37,19 @@ public class PieceFactory {
                                 new Block(BlockDirection.UP,
                                         new Block(BlockDirection.RIGHT, null))))));
     }
+
+    public static Piece nextPiece(int nextPiece) {
+        switch (nextPiece) {
+            case 0:
+                return createBlockPiece();
+            case 1:
+                return createTheOtherBrokenBlockPiece();
+            case 2:
+                return createTrianglePiece();
+            case 3:
+                return createBrokenBlockPiece();
+            default:
+                return createLinePiece();
+        }
+    }
 }

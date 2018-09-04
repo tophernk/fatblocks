@@ -1,12 +1,26 @@
 package cj.blocks;
 
+import java.util.HashSet;
+import java.util.Random;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class BlockGame {
+public class BlockGame implements Runnable {
 
-    private int startingX = -2;
-    public static final int STARTING_Y = 0;
+    private Set<BlockPrintListener> printListeners = new HashSet<>();
+    private Random random;
+
+    public void addPrintListener(BlockPrintListener listener) {
+        printListeners.add(listener);
+    }
+
+    public void removePrintListener(BlockPrintListener listener) {
+        printListeners.remove(listener);
+    }
+
+    private static final int STARTING_X = 0;
+    private static final int STARTING_Y = 0;
     public static final int PLAYING_FIELD_WIDTH = 14;
     public static final int PLAYING_FIELD_HEIGHT = 18;
     private final int tickTime;
@@ -14,7 +28,6 @@ public class BlockGame {
     private Piece currentPiece;
     private int currentPiece_x;
     private int currentPiece_y;
-    private boolean toggle;
     private BlockDirection[] currentOrientation = new BlockDirection[4];
 
     public BlockGame(int tickTime) {
@@ -39,6 +52,7 @@ public class BlockGame {
         return result;
     }
 
+    @Override
     public void run() {
         while (noPieceAtTop()) {
             try {
@@ -66,20 +80,8 @@ public class BlockGame {
         boolean dropped = true;
         while (dropped) {
             dropped = tick();
-            if (dropped) {
-//                movePieceLaterally();
-//                rotateClockwise();
-            }
         }
         addPieceToPlayingField(playingField.getGameArea());
-    }
-
-    private void movePieceLaterally() {
-        if (toggle) {
-            moveRight();
-        } else {
-            moveLeft();
-        }
     }
 
     public boolean tick() throws InterruptedException {
@@ -114,9 +116,9 @@ public class BlockGame {
 
     private void print() {
         clearScreen();
-        boolean[][] currentField = copyPlayingField();
+        final boolean[][] currentField = copyPlayingField();
         addPieceToPlayingField(currentField);
-
+        printListeners.forEach(l -> l.print(currentField));
         for (boolean[] line : currentField) {
             System.out.print("|");
             for (boolean field : line) {
@@ -186,39 +188,26 @@ public class BlockGame {
     }
 
     public void generateNewPiece() {
-        if (toggle) {
-            currentPiece = PieceFactory.createTrianglePiece();
-        } else {
-            currentPiece = PieceFactory.createTheOtherBrokenBlockPiece();
-        }
-        toggle = !toggle;
-//        currentPiece = PieceFactory.createBrokenBlockPiece();
-//        currentPiece = PieceFactory.createLinePiece();
-        currentPiece = PieceFactory.createBlockPiece();
-        if (startingX + 2 < PLAYING_FIELD_WIDTH) {
-            startingX += 2;
-        }
-        else {
-            startingX = 0;
-        }
-        currentPiece_x = startingX;
+        random = new Random();
+        currentPiece = PieceFactory.nextPiece(random.nextInt(5));
+        currentPiece_x = STARTING_X;
         currentPiece_y = STARTING_Y;
         resetOrientation();
     }
 
-    private void moveRight() {
+    public void moveRight() {
         if (canPieceMoveTo(0, 1, currentOrientation)) {
             currentPiece_x++;
         }
     }
 
-    private void moveLeft() {
+    public void moveLeft() {
         if (canPieceMoveTo(0, -1, currentOrientation)) {
             currentPiece_x--;
         }
     }
 
-    private void rotateClockwise() {
+    public void rotateClockwise() {
         BlockDirection[] rotatedOrientation = changeOrientation(Rotation.CLOCKWISE);
         if (canPieceMoveTo(0, 0, rotatedOrientation)) {
             currentOrientation = rotatedOrientation;
