@@ -19,7 +19,7 @@ public class BlockGame implements Runnable {
         printListeners.remove(listener);
     }
 
-    private static final int STARTING_X = 0;
+    private static final int STARTING_X = 6;
     private static final int STARTING_Y = 0;
     public static final int PLAYING_FIELD_WIDTH = 14;
     public static final int PLAYING_FIELD_HEIGHT = 18;
@@ -97,7 +97,10 @@ public class BlockGame implements Runnable {
         for (int y = 0; y < PLAYING_FIELD_HEIGHT; y++) {
             boolean removeLine = true;
             for (int x = 0; x < PLAYING_FIELD_WIDTH; x++) {
-                removeLine = playingField.getGameArea()[y][x];
+                if (!playingField.getGameArea()[y][x]) {
+                    removeLine = false;
+                    break;
+                }
             }
             if (removeLine) {
                 for (int x = 0; x < PLAYING_FIELD_WIDTH; x++) {
